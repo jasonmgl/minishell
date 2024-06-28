@@ -6,100 +6,116 @@
 /*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/16 14:14:13 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/26 18:21:16 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/13 14:50:44 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static char	*extract_name(char *envp)
+static char	*extract_name(char *arg, size_t *i)
 {
-	int		i;
-	int		len_word;
+	size_t	size;
 	char	*name;
 
-	if (!envp)
+	size = get_first_match(arg, "=");
+	name = ft_calloc(size + 1, sizeof(char));
+	if (name == NULL)
 		return (NULL);
-	i = 0;
-	len_word = len_word_with_set(envp, "=");
-	name = ft_calloc(len_word + 1, sizeof(char));
-	if (!name)
-		return (NULL);
-	while (i < len_word && envp[i])
+	while (arg[*i] && (*i < size))
 	{
-		name[i] = envp[i];
-		i++;
+		name[*i] = arg[*i];
+		(*i)++;
 	}
-	name[i] = '\0';
+	name[*i] = '\0';
 	return (name);
 }
 
-static char	*extract_value(char *envp)
+static char	*extract_value(char *arg, bool assigned)
 {
-	int		i;
-	int		len_word;
+	size_t	i;
+	size_t	size;
 	char	*value;
 
-	//printf("envp after = : %s\n", envp);
-	if (!envp)
+	if (assigned == false)
+		return (ft_strdup(""));
+	size = ft_strlen(arg);
+	value = ft_calloc(size + 1, sizeof(char));
+	if (value == NULL)
 		return (NULL);
 	i = 0;
-	len_word = ft_strlen(&envp[i]);
-	value = ft_calloc(len_word + 1, sizeof(char));
-	if (!value)
-		return (NULL);
-	while (i < len_word && envp[i])
+	while (arg[i] && (i < size))
 	{
-		value[i] = envp[i];
+		value[i] = arg[i];
 		i++;
 	}
 	value[i] = '\0';
 	return (value);
 }
 
-static int	extract(t_envp *tmp, char *name, char *value)
+static int	venv_name_contain_punct(char *name)
 {
-	if (!tmp || !name)
-		return (0);
-	while (tmp)
+	size_t	i;
+
+	i = 0;
+	while (name[i])
 	{
-		if (ft_strncmp(tmp->name, name, ft_strlen(name) + 1) == 0)
+		if (ft_isalnum(name[i]) == 0 && name[i] != '_')
 		{
-			free(tmp->value);
-			tmp->value = value;
-			return (1);
+			error_handler("export: not valid in this context: ");
+			error_handler(name);
+			error_handler("\n");
+			return (ERR);
 		}
-		tmp = tmp->next;
+		i++;
 	}
-	return (0);
+	return (SUCCESS);
 }
 
-int	extract_var_env(char *envp, t_envp **envp_lst)
+int	add_venv_to_export(char *arg, t_envp **export)
 {
 	size_t	i;
 	char	*name;
 	char	*value;
-	t_envp	*tmp;
+	bool	assigned;
+	t_envp	*venv;
 
-	if (!envp)
-		return (0);
 	i = 0;
-	name = extract_name(envp);
-	//printf("name: %s\n", name);
-	//printf("envp: %s\n", envp);
-	while (envp[i] && envp[i] != '=')
-		i++;
-	if (envp[i] == '=')
-		value = extract_value(&envp[++i]);
-	else
-		value = ft_strdup("");
-	tmp = *envp_lst;
-	if (!extract(tmp, name, value) && name)
+	assigned = value_is_assigned(arg);
+	name = extract_name(arg, &i);
+	if (name == NULL || str_is_equal(name, "") || venv_name_contain_punct(name))
 	{
-		tmp = envp_lstnew(name, value);
-		if (!tmp)
-			return (0);
-		envp_lstadd_back(envp_lst, tmp);
+		free(name);
+		return (ERR);
 	}
-	return (1);
+	venv = get_venv(*export, name);
+	value = extract_value(&arg[++i], assigned);
+	if (value == NULL)
+		return (ERR);
+	if (venv == NULL)
+		return (add_venv(export, name, value, assigned));
+	else
+		return (update_venv(*export, name, value));
+}
+
+int	add_venv_to_env(char *arg, t_envp **env)
+{
+	size_t	i;
+	char	*name;
+	char	*value;
+	t_envp	*venv;
+
+	i = 0;
+	if (value_is_assigned(arg) == false)
+		return (ERR);
+	name = extract_name(arg, &i);
+	if (name == NULL)
+		return (ERR);
+	venv = get_venv(*env, name);
+	value = extract_value(&arg[++i], true);
+	if (value == NULL)
+		return (ERR);
+	if (venv == NULL)
+		return (add_venv(env, name, value, true));
+	else
+		return (update_venv(*env, name, value));
 }

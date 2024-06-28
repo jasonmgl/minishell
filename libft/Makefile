@@ -47,6 +47,7 @@ SRCS				=	${SRCS_D}ft_atoi.c \
 						${SRCS_D}ft_isascii.c \
 						${SRCS_D}ft_isdigit.c \
 						${SRCS_D}ft_isprint.c \
+						${SRCS_D}ft_isspace.c	\
 						${SRCS_D}ft_itoa.c \
 						${SRCS_D}ft_memchr.c \
 						${SRCS_D}ft_memcmp.c \

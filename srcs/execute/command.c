@@ -6,11 +6,44 @@
 /*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/02 15:44:21 by rsequeir          #+#    #+#             */
-/*   Updated: 2024/04/25 13:46:12 by rsequeir         ###   ########.fr       */
+/*   Updated: 2024/05/06 00:53:50 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
+
+static char	*get_absolute_path(char *command, int *status)
+{
+	if (access(command, F_OK | X_OK) == 0)
+		return (ft_strdup(command));
+	else if (access(command, F_OK) == 0 && access(command, X_OK) == -1)
+	{
+		*status = 126;
+		print_permission_denied(command);
+	}
+	else
+	{
+		*status = 127;
+		print_command_not_found(command);
+	}
+	return (NULL);
+}
+
+static char	*get_rel_path(char *command, char **envp, int *status)
+{
+	char	*command_path;
+	char	**path;
+
+	path = get_env_path(envp);
+	command_path = search_in_path(command, path);
+	if (command_path == NULL)
+	{
+		*status = 127;
+		print_command_not_found(command);
+	}
+	free_split(path);
+	return (command_path);
+}
 
 char	*search_in_path(char *command, char **path)
 {
@@ -32,39 +65,9 @@ char	*search_in_path(char *command, char **path)
 	return (NULL);
 }
 
-char	*get_command_path(char *command, char **envp)
+char	*get_command_path(char *command, char **envp, int *status)
 {
-	char	*command_path;
-	char	**path;
-
 	if (ft_strchr(command, '/') != NULL)
-	{
-		if (access(command, F_OK | X_OK) == 0)
-			return (ft_strdup(command));
-		else if (access(command, F_OK) == 0 && access(command, X_OK) == -1)
-			print_permission_denied(command);
-		else
-			print_command_not_found(command);
-		return (NULL);
-	}
-	path = get_env_path(envp);
-	command_path = search_in_path(command, path);
-	if (command_path == NULL)
-		print_command_not_found(command);
-	free_split(path);
-	return (command_path);
+		return (get_absolute_path(command, status));
+	return (get_rel_path(command, envp, status));
 }
-
-// A MODIFIER
-/* char	**get_arg(char	*argv)
-{
-	char	**arg;
-
-	arg = ft_split(argv, ' ');
-	if (arg == NULL)
-	{
-		print_strerror();
-		exit(ERROR);
-	}
-	return (arg);
-} */

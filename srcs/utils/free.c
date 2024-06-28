@@ -6,7 +6,7 @@
 /*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/27 13:41:15 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/26 15:52:16 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/13 15:58:37 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,9 @@ void	free_lst_token(t_token *token)
 		tmp = token;
 		token = token->next;
 		free(tmp->data);
+		tmp->data = NULL;
 		free(tmp);
+		tmp = NULL;
 	}
 }
 
@@ -33,13 +35,18 @@ void	free_lst_envp(t_envp *envp)
 
 	if (!envp)
 		return ;
+	while (envp->prev)
+		envp = envp->prev;
 	while (envp)
 	{
 		tmp = envp;
 		envp = envp->next;
 		free(tmp->name);
+		tmp->name = NULL;
 		free(tmp->value);
+		tmp->value = NULL;
 		free(tmp);
+		tmp = NULL;
 	}
 }
 
@@ -51,11 +58,7 @@ void	free_bloc_lst_token(t_token **token)
 		return ;
 	i = 0;
 	while (token[i])
-	{
-		free_lst_token(token[i]);
-		free(token[i]);
-		i++;
-	}
+		free_lst_token(token[i++]);
 }
 
 void	free_data(t_data *data)
@@ -67,6 +70,16 @@ void	free_data(t_data *data)
 	if (data->export)
 		free_lst_envp(data->export);
 	if (data->bloc_lst)
+	{
 		free_bloc_lst_token(data->bloc_lst);
+		if (data->bloc_lst)
+		{
+			free(data->bloc_lst);
+			data->bloc_lst = NULL;
+		}
+	}
+	if (data->lst)
+		free_lst_token(data->lst);
+	restore_std_fd(data);
 	ft_memset(data, 0, sizeof(t_data));
 }

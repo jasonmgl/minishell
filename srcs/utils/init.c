@@ -6,37 +6,32 @@
 /*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 14:50:19 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/25 15:22:22 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/13 15:55:47 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static int	init_env_lst(char *envp[], t_data *data)
+int	init_env(t_data *data, char *envp[])
 {
 	size_t	i;
 
-	if (!data)
-		return (0);
 	i = 0;
+	ft_memset(data, 0, sizeof(t_data));
+	data->envp = envp;
+	data->fd_stdin = -1;
+	data->fd_stdout = -1;
 	while (envp[i])
 	{
-		extract_var_env(envp[i], &data->env);
-		extract_var_env(envp[i], &data->export);
+		add_venv_to_env(envp[i], &data->env);
+		if (add_venv_to_export(envp[i], &data->export) == ERR)
+		{
+			error_handler("Error : unable to initialize environment: ");
+			strerror(errno);
+			free_data(data);
+			return (ERR);
+		}
 		i++;
 	}
-	return (1);
-}
-
-int	init_struct(t_data *data, char *envp[])
-{
-	if (!envp)
-		return (0);
-	if (!data->envp)
-	{
-		data->envp = envp;
-		if (!init_env_lst(envp, data))
-			return (0);
-	}
-	return (1);
+	return (SUCCESS);
 }

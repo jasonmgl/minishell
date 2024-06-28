@@ -15,7 +15,11 @@ CC				=		cc
 
 CFLAGS			=		-Wall -Wextra -Werror -I libft/includes/ -I includes/ -g3
 
-HEADER			=		includes/minishell.h
+HEADER			=		includes/minishell.h \
+						includes/builtins.h \
+						includes/execute.h \
+						includes/parsing.h \
+						includes/utils.h \
 
 LIB_H			=		libft/include/libft.h
 
@@ -49,30 +53,46 @@ PARSING			=		${PARSING_D}tokeniser.c \
 						${PARSING_D}remove_quotes.c \
 						${PARSING_D}expand.c \
 
-UTILS			=		${UTILS_D}free.c \
-						${UTILS_D}token_lst_utils.c \
-						${UTILS_D}envp_lst_utils.c \
-						${UTILS_D}tokeniser_into_lst_utils.c \
-						${UTILS_D}init.c \
-						${UTILS_D}builtins_utils.c \
-						${UTILS_D}envp_utils.c \
-						${UTILS_D}split_set.c \
-						${UTILS_D}expand_utils.c
+UTILS			=		${UTILS_D}builtins_utils.c 				\
+						${UTILS_D}env_utils.c 					\
+						${UTILS_D}envp_lst_utils.c 				\
+						${UTILS_D}envp_utils.c 					\
+						${UTILS_D}error.c						\
+						${UTILS_D}free.c 						\
+						${UTILS_D}init.c 						\
+						${UTILS_D}token_lst_utils.c				\
+						${UTILS_D}token_utils.c 				\
+						${UTILS_D}tokeniser_into_lst_utils.c	\
+						${UTILS_D}utils.c 						\
+
 
 CHECK			=		${CHECK_D}syntax.c \
 
-BUILTINS		=		${BUILTINS_D}pwd.c \
-						${BUILTINS_D}env.c \
-						${BUILTINS_D}export.c \
+BUILTINS		=		${BUILTINS_D}pwd.c		\
+						${BUILTINS_D}cd.c 		\
+						${BUILTINS_D}cd_utils.c	\
+						${BUILTINS_D}env.c		\
+						${BUILTINS_D}unset.c 	\
+						${BUILTINS_D}export.c	\
+						${BUILTINS_D}exit.c		\
+						${BUILTINS_D}echo.c		\
 
 SIGNALS			=		${SIGNALS_D}signals.c \
 
-EXECUTION		=		${EXECUTION_D}command.c \
-						${EXECUTION_D}error_handling.c \
-						${EXECUTION_D}execute_utils.c \
-						${EXECUTION_D}execute.c \
-						${EXECUTION_D}file.c \
-						${EXECUTION_D}path.c \
+EXECUTION		=		${EXECUTION_D}builtins.c		\
+						${EXECUTION_D}command.c 		\
+						${EXECUTION_D}envp_to_array.c	\
+						${EXECUTION_D}error_handling.c	\
+						${EXECUTION_D}execute_utils.c 	\
+						${EXECUTION_D}execute.c 		\
+						${EXECUTION_D}file.c 			\
+						${EXECUTION_D}free_exec.c 		\
+						${EXECUTION_D}heredoc.c			\
+						${EXECUTION_D}open_files.c		\
+						${EXECUTION_D}parse_data.c		\
+						${EXECUTION_D}parse_utils.c		\
+						${EXECUTION_D}path.c 			\
+						${EXECUTION_D}tmp_file.c		\
 
 # ************************************************** #
 
@@ -92,7 +112,7 @@ OBJS_EXECUTION	=		${patsubst ${EXECUTION_D}%.c, ${OBJS_D}%.o, ${EXECUTION}}
 
 # ************************************************** #
 
-${NAME} :				${OBJS_D} ${OBJS_SRCS} ${OBJS_PARSING} ${OBJS_UTILS} ${OBJS_CHECK} ${OBJS_BUILTINS} ${OBJS_SIGNALS} ${OBJS_EXECUTION} ${HEADER} Makefile
+${NAME} :				${LIB_A} ${OBJS_D} ${OBJS_SRCS} ${OBJS_PARSING} ${OBJS_UTILS} ${OBJS_CHECK} ${OBJS_BUILTINS} ${OBJS_SIGNALS} ${OBJS_EXECUTION} ${HEADER} Makefile
 	@${MAKE} -C libft/ --no-print-directory
 	${CC} ${CFLAGS} ${OBJS_SRCS} ${OBJS_PARSING} ${OBJS_UTILS} ${OBJS_CHECK} ${OBJS_BUILTINS} ${OBJS_SIGNALS} ${OBJS_EXECUTION} ${LIB_A} -o $@ -lreadline
 
@@ -120,6 +140,12 @@ ${OBJS_D}%.o :			${EXECUTION_D}%.c ${HEADER} Makefile
 ${OBJS_D}:
 	@mkdir -p $@
 
+${LIB_A}: FORCE
+	${MAKE} -C libft/ --no-print-directory
+
+FORCE:
+
+
 # ************************************************** #
 
 all :					${NAME}
@@ -136,6 +162,6 @@ re :	fclean all
 
 # ************************************************** #
 
-.PHONY :		all clean fclean re
+.PHONY :		all clean fclean re FORCE
 
 # ************************************************** #

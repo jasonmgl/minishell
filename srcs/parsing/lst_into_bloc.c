@@ -12,12 +12,37 @@
 
 #include "minishell.h"
 
+static void	realloc_nodes(t_token *lst, t_token	**lst_bloc)
+{
+	bool	in_bloc;
+	t_token	*tmp;
+	int		i;
+
+	i = 0;
+	in_bloc = false;
+	tmp = lst;
+	while (tmp)
+	{
+		if (!in_bloc)
+		{
+			in_bloc = true;
+			lst_bloc[i] = token_lstnew(tmp->data, tmp->type);
+		}
+		else if (tmp->type == PIPE)
+		{
+			in_bloc = false;
+			i++;
+		}
+		else
+			token_lstadd_back(&lst_bloc[i], token_lstnew(tmp->data, tmp->type));
+		tmp = tmp->next;
+	}
+}
+
 int	count_nbr_enum_lst(t_token *lst, enum e_redir type)
 {
 	int		nbr_enum;
 
-	if (!lst)
-		return (0);
 	nbr_enum = 0;
 	while (lst)
 	{
@@ -28,44 +53,6 @@ int	count_nbr_enum_lst(t_token *lst, enum e_redir type)
 	return (nbr_enum);
 }
 
-static void	delete(t_token **lst, bool *in_bloc)
-{
-	t_token	*tmp;
-
-	if (!lst)
-		return ;
-	tmp = *lst;
-	if (tmp->prev)
-		tmp->prev->next = NULL;
-	if (tmp->next)
-		tmp->next->prev = NULL;
-	*lst = (*lst)->next;
-	free(tmp->data);
-	free(tmp);
-	*in_bloc = false;
-}
-
-static void	delete_pipe_node(t_token *lst, t_token	**lst_bloc)
-{
-	bool	in_bloc;
-	int		i;
-
-	i = 0;
-	in_bloc = false;
-	while (lst)
-	{
-		if (!in_bloc)
-		{
-			lst_bloc[i++] = lst;
-			in_bloc = true;
-		}
-		if (lst->type == PIPE)
-			delete(&lst, &in_bloc);
-		else
-			lst = lst->next;
-	}
-}
-
 int	lst_into_bloc(t_data *data, t_token *lst)
 {
 	t_token	**lst_bloc;
@@ -74,8 +61,9 @@ int	lst_into_bloc(t_data *data, t_token *lst)
 	data->nbr_h_doc = count_nbr_enum_lst(lst, H_DOC);
 	lst_bloc = ft_calloc((data->nbr_pipe + 1) + 1, sizeof(t_token *));
 	if (!lst_bloc)
-		return (0);
-	delete_pipe_node(lst, lst_bloc);
+		return (ERR);
+	realloc_nodes(lst, lst_bloc);
+	lst_bloc[data->nbr_pipe + 1] = NULL;
 	data->bloc_lst = lst_bloc;
-	return (1);
+	return (SUCCESS);
 }

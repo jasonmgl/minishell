@@ -12,29 +12,33 @@
 
 #include "minishell.h"
 
-static int	extract_word(t_token **lst, const char *line, int *i)
+static int	extract_word(t_token **lst, char *line, int *i)
 {
 	char	*buf;
 	int		len;
 	t_token	*lst_new;
 
-	if (!line)
-		return (0);
 	lst_new = NULL;
 	if (find_quote(line))
 		len = len_word_in_quotes(line, find_quote(line));
 	else
-		len = len_word_with_set(line, "|<> ");
+		len = get_first_match(line, "|<> ");
 	buf = ft_calloc(len + 1, sizeof(char));
 	if (!buf)
-		return (0);
+		return (ERR);
 	ft_strlcpy(buf, line, len + 1);
+	buf[len] = '\0';
+	buf = remove_quotes(buf);
+	decrypt_value(&buf);
+	if (buf == NULL)
+		return (ERR);
 	lst_new = token_lstnew(buf, WORD);
 	if (!lst_new)
-		return (0);
+		return (ERR);
 	token_lstadd_back(lst, lst_new);
 	*i += len;
-	return (1);
+	free(buf);
+	return (SUCCESS);
 }
 
 static int	extract_op(t_token **lst, char *str, t_redir type, int *i)
@@ -42,17 +46,16 @@ static int	extract_op(t_token **lst, char *str, t_redir type, int *i)
 	char	*buf;
 	t_token	*lst_new;
 
-	if (!str)
-		return (0);
 	buf = ft_strdup(str);
 	if (!buf)
-		return (0);
+		return (ERR);
 	lst_new = token_lstnew(buf, type);
 	if (!lst_new)
-		return (0);
+		return (ERR);
 	token_lstadd_back(lst, lst_new);
 	*i += ft_strlen(buf);
-	return (1);
+	free(buf);
+	return (SUCCESS);
 }
 
 static int	extract_r_chevron(t_token **lst, char *line, int *i)
@@ -77,8 +80,6 @@ t_token	*tokeniser(char *line)
 	int		i;
 	int		verif;
 
-	if (!line)
-		return (NULL);
 	i = 0;
 	lst = NULL;
 	verif = 0;
@@ -94,8 +95,9 @@ t_token	*tokeniser(char *line)
 			verif = extract_op(&lst, "|", PIPE, &i);
 		else if (line[i] != ' ' && line[i])
 			verif = extract_word(&lst, &line[i], &i);
-		if (verif == 0)
+		if (verif == ERR)
 			return (NULL);
 	}
+	edit_lst_type(lst);
 	return (lst);
 }
