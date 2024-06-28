@@ -6,24 +6,30 @@
 /*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 14:48:13 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/25 14:19:51 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/05 18:41:07 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	ft_env(t_data *data)
+void	env(t_envp *env, t_token *lst)
 {
-	t_envp	*tmp;
+	t_sig	*sig;
 
-	if (!data)
-		return (0);
-	tmp = data->env;
-	while (tmp)
+	sig = get_sig();
+	if (lst->next && lst->next->type == PARAM)
 	{
-		if (tmp->value)
-			printf("%s=%s\n", tmp->name, tmp->value);
-		tmp = tmp->next;
+		printf("env: `%s`: No such file or directory\n", lst->next->data);
+		sig->status = 127;
 	}
-	return (1);
+	else
+	{
+		while (env)
+		{
+			if (env->equal)
+				printf("%s=%s\n", env->name, env->value);
+			env = env->next;
+		}
+		sig->status = 0;
+	}
 }

@@ -1,30 +1,43 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   cd_utils.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/09 14:29:04 by jmougel           #+#    #+#             */
-/*   Updated: 2024/05/04 14:03:24 by rsequeir         ###   ########.fr       */
+/*   Created: 2024/05/06 00:28:14 by rsequeir          #+#    #+#             */
+/*   Updated: 2024/05/06 14:56:51 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	pwd(void)
+int	check_args(size_t nb_args, t_sig *sig)
 {
-	t_sig	*sig;
-	char	*pwd;
-
-	sig = get_sig();
-	pwd = getcwd(NULL, 0);
-	if (pwd == NULL)
+	if (nb_args > 2)
 	{
+		error_handler("cd: too many arguments\n");
 		sig->status = 1;
-		return ;
+		return (ERR);
 	}
-	printf("%s\n", pwd);
+	return (SUCCESS);
+}
+
+int	is_absolute_path(char *arg)
+{
+	if (arg && ((arg[0] == '/') || (arg[0] == '~')))
+		return (1);
+	return (0);
+}
+
+char	*get_relative_path(t_envp *env, char *arg)
+{
+	char	*pwd;
+	char	*path;
+
+	pwd = get_venv_value(env, "PWD");
+	path = ft_strjoin(pwd, "/");
 	free(pwd);
-	sig->status = 0;
+	path = ft_strjoin_free(path, arg);
+	return (path);
 }

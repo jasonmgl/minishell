@@ -1,30 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   ft_isspace.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/09 14:29:04 by jmougel           #+#    #+#             */
-/*   Updated: 2024/05/04 14:03:24 by rsequeir         ###   ########.fr       */
+/*   Created: 2024/05/06 00:55:50 by rsequeir          #+#    #+#             */
+/*   Updated: 2024/05/06 00:56:41 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../includes/libft.h"
 
-void	pwd(void)
+int	ft_isspace(char c)
 {
-	t_sig	*sig;
-	char	*pwd;
-
-	sig = get_sig();
-	pwd = getcwd(NULL, 0);
-	if (pwd == NULL)
-	{
-		sig->status = 1;
-		return ;
-	}
-	printf("%s\n", pwd);
-	free(pwd);
-	sig->status = 0;
+	return ((c >= 9 && c <= 13) || c == 32);
 }

@@ -6,91 +6,88 @@
 /*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/10 14:48:13 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/25 17:53:14 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/13 18:56:45 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	swap(t_envp *export)
+static void	swap_venv(t_envp *node)
 {
-	t_envp	*next_node;
+	t_envp	*next;
 
-	if (!export->next)
+	if (node->next == NULL)
 		return ;
-	next_node = export->next;
-	next_node->prev = export->prev;
-	if (export->prev)
-		export->prev->next = next_node;
-	export->prev = next_node;
-	export->next = next_node->next;
-	if (next_node->next)
-		next_node->next->prev = export;
-	next_node->next = export;
+	next = node->next;
+	next->prev = node->prev;
+	if (node->prev)
+		node->prev->next = next;
+	node->prev = next;
+	node->next = next->next;
+	if (next->next)
+		next->next->prev = node;
+	next->next = node;
 }
 
-static int	sort(t_envp	*tmp)
+static void	sort_env(t_envp *env)
 {
 	size_t	i;
 
-	i = 0;
-	while (tmp->next)
+	while (env && env->next)
 	{
-		if (tmp->name[i] > tmp->next->name[i])
-		{
-			swap(tmp);
-			while (tmp->prev)
-				tmp = tmp->prev;
-			i = 0;
-		}
-		else if (tmp->name[i] == tmp->next->name[i])
+		i = 0;
+		while (env->name[i] && env->next->name[i] && \
+		env->name[i] == env->next->name[i])
 			i++;
+		if (env->name[i] > env->next->name[i])
+		{
+			swap_venv(env);
+			while (env->prev)
+				env = env->prev;
+		}
 		else
-		{
-			tmp = tmp->next;
-			i = 0;
-		}
+			env = env->next;
 	}
-	return (1);
 }
 
-static int	display_env_var(t_envp *export)
+static void	print_export(t_envp *env)
 {
-	if (!export)
-		return (0);
-	sort(export);
-	while (export->prev)
-		export = export->prev;
-	while (export)
+	t_envp	*tmp;
+
+	sort_env(env);
+	while (env && env->prev)
+		env = env->prev;
+	tmp = env;
+	while (tmp)
 	{
-		printf("declare -x %s=%s\n", export->name, export->value);
-		export = export->next;
+		if (tmp->equal)
+			printf("declare -x %s=\"%s\"\n", tmp->name, tmp->value);
+		else
+			printf("declare -x %s\n", tmp->name);
+		tmp = tmp->next;
 	}
-	return (1);
 }
 
-int	ft_export(t_data *data, t_token *lst)
+void	export(t_data *data, t_token *token)
 {
-	if (!data || !lst)
-		return (0);
-	if (ft_strncmp(lst->data, "export", 7) == 0 && lst->next)
+	size_t	nb_args;
+	t_sig	*sig;
+
+	sig = get_sig();
+	nb_args = get_token_size(token);
+	if (nb_args == 1)
 	{
-		while (lst)
+		print_export(data->export);
+		sig->status = 0;
+		return ;
+	}
+	while (token)
+	{
+		if (token->type == VAR_ENV_EXP)
 		{
-			if (lst->type == VAR_ENV_EXP)
-			{
-				if (!extract_var_env(lst->data, &data->export))
-					return (0);
-				if (!extract_var_env(lst->data, &data->env))
-					return (0);
-			}
-			lst = lst->next;
+			if (add_venv_to_export(token->data, &data->export) == SUCCESS)
+				add_venv_to_env(token->data, &data->env);
 		}
+		token = token->next;
 	}
-	else if (ft_strncmp(lst->data, "export", 7) == 0)
-	{
-		if (!display_env_var(data->export))
-			return (0);
-	}
-	return (1);
 }

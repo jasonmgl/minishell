@@ -6,16 +6,27 @@
 /*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/04/15 18:40:29 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/25 13:32:53 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/05 22:50:54 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-static void	apply_identification(t_token *lst)
+static void	count_commands(t_data *data, t_token **bloc_lst)
 {
-	if (!lst)
-		return ;
+	size_t	i;
+
+	i = 0;
+	data->nbr_cmd = 0;
+	while (bloc_lst[i])
+	{
+		data->nbr_cmd += count_nbr_enum_lst(bloc_lst[i], CMD);
+		data->nbr_cmd += count_nbr_enum_lst(bloc_lst[i++], BUILTIN);
+	}
+}
+
+void	apply_identification(t_token *lst)
+{
 	while (lst)
 	{
 		if (ft_strncmp(lst->data, "export", 7) == 0 && lst->next)
@@ -34,13 +45,11 @@ static void	apply_identification(t_token *lst)
 	}
 }
 
-int	identify_builtins(t_token **bloc_lst)
+void	identify_builtins(t_data *data, t_token **bloc_lst)
 {
 	size_t	i;
 	t_token	*ptr;
 
-	if (!bloc_lst || !*bloc_lst)
-		return (0);
 	i = 0;
 	while (bloc_lst[i])
 	{
@@ -57,24 +66,8 @@ int	identify_builtins(t_token **bloc_lst)
 				ptr->type = BUILTIN;
 			ptr = ptr->next;
 		}
+		apply_identification(bloc_lst[i]);
 		i++;
 	}
-	return (1);
-}
-
-int	identify_var_env(t_token **bloc_lst, t_data *data)
-{
-	size_t	i;
-
-	if (!bloc_lst || !*bloc_lst || !data)
-		return (0);
-	i = 0;
-	data->nbr_cmd = 0;
-	while (bloc_lst[i])
-	{
-		apply_identification(bloc_lst[i]);
-		data->nbr_cmd += count_nbr_enum_lst(bloc_lst[i], CMD);
-		data->nbr_cmd += count_nbr_enum_lst(bloc_lst[i++], BUILTIN);
-	}
-	return (1);
+	count_commands(data, bloc_lst);
 }

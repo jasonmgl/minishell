@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   path.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rsequeir <rsequeir@student.42lyon.fr>      +#+  +:+       +#+        */
+/*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/02 15:41:57 by rsequeir          #+#    #+#             */
-/*   Updated: 2024/04/16 16:30:04 by rsequeir         ###   ########.fr       */
+/*   Updated: 2024/05/05 23:18:09 by jmougel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	append_slashes(char **path)
+static int	append_slashes(char **path)
 {
 	char	*new_path;
 	int		i;
@@ -29,17 +29,7 @@ int	append_slashes(char **path)
 	return (SUCCESS);
 }
 
-void	free_split(char **split)
-{
-	int	i;
-
-	i = 0;
-	while (split && split[i])
-		free(split[i++]);
-	free(split);
-}
-
-char	*find_path_env(char **envp)
+static char	*find_path_env(char **envp)
 {
 	int	i;
 
@@ -51,6 +41,16 @@ char	*find_path_env(char **envp)
 		i++;
 	}
 	return (NULL);
+}
+
+void	free_split(char **split)
+{
+	int	i;
+
+	i = 0;
+	while (split && split[i])
+		free(split[i++]);
+	free(split);
 }
 
 char	**get_env_path(char **envp)

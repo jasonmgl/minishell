@@ -1,30 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   error.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
+/*   By: rsequeir <rsequeir@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/09 14:29:04 by jmougel           #+#    #+#             */
-/*   Updated: 2024/05/04 14:03:24 by rsequeir         ###   ########.fr       */
+/*   Created: 2024/05/04 02:46:27 by rsequeir          #+#    #+#             */
+/*   Updated: 2024/05/04 02:46:45 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	pwd(void)
+void	error_handler(char *error)
 {
-	t_sig	*sig;
-	char	*pwd;
-
-	sig = get_sig();
-	pwd = getcwd(NULL, 0);
-	if (pwd == NULL)
-	{
-		sig->status = 1;
-		return ;
-	}
-	printf("%s\n", pwd);
-	free(pwd);
-	sig->status = 0;
+	ft_putstr_fd(error, STDERR_FILENO);
 }

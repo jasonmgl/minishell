@@ -1,30 +1,24 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   pwd.c                                              :+:      :+:    :+:   */
+/*   ftsignal.h                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/04/09 14:29:04 by jmougel           #+#    #+#             */
-/*   Updated: 2024/05/04 14:03:24 by rsequeir         ###   ########.fr       */
+/*   Created: 2024/05/06 00:14:38 by rsequeir          #+#    #+#             */
+/*   Updated: 2024/05/06 13:46:20 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#ifndef FTSIGNAL_H
+# define FTSIGNAL_H
 
-void	pwd(void)
-{
-	t_sig	*sig;
-	char	*pwd;
+# include "struct.h"
 
-	sig = get_sig();
-	pwd = getcwd(NULL, 0);
-	if (pwd == NULL)
-	{
-		sig->status = 1;
-		return ;
-	}
-	printf("%s\n", pwd);
-	free(pwd);
-	sig->status = 0;
-}
+void	add_struct_to_sig(t_data *data, t_cmd **cmd);
+t_sig	*get_sig(void);
+void	init_sig(void);
+void	signal_handler(int sign);
+void	signal_child_handler(int sign);
+
+#endif

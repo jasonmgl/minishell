@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_strchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/11/09 15:36:45 by jmougel           #+#    #+#             */
-/*   Updated: 2024/03/20 08:25:52 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/05/05 00:52:00 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ char	*ft_strchr(const char *s, int c)
 	size_t	i;
 
 	i = 0;
+	if (s == NULL)
+		return (NULL);
 	if ((unsigned char)c == '\0')
 		return ((char *)(s + ft_strlen(s)));
 	while (s[i])

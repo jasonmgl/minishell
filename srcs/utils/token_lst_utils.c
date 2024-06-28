@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   token_lst_utils.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jmougel <jmougel@student.42.fr>            +#+  +:+       +#+        */
+/*   By: rsequeir <rsequeir@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 17:13:14 by jmougel           #+#    #+#             */
-/*   Updated: 2024/04/25 13:30:17 by jmougel          ###   ########.fr       */
+/*   Updated: 2024/04/30 17:39:31 by rsequeir         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ t_token	*token_lstnew(char *data, enum e_redir type)
 	new_node = ft_calloc(1, sizeof(t_token));
 	if (!new_node)
 		return (NULL);
-	new_node->data = data;
+	new_node->data = ft_strdup(data);
 	new_node->type = type;
 	return (new_node);
 }
