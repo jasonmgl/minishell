@@ -1,7 +1,4 @@
-# Minishell
-A basic shell implemented in C.
-
-## PRESENTATION
+# MINISHELL
 Minishell is a simple command-line interpreter that mimics the behavior of a Unix shell. It allows users to execute commands, manage processes, and interact with the operating system through a text-based interface. This project serves as an educational tool to understand the fundamentals of shell programming and process management in Unix-like systems.
 
 ## USAGE
